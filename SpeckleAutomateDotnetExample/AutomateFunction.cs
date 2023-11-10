@@ -1,8 +1,11 @@
-using Objects;
-using Objects.Geometry;
+﻿using Objects;
+using Objects.BuiltElements.Revit;
 using Speckle.Automate.Sdk;
 using Speckle.Core.Logging;
+using Speckle.Core.Models;
 using Speckle.Core.Models.Extensions;
+using Speckle.Core.Models.GraphTraversal;
+using System;
 
 static class AutomateFunction
 {
@@ -18,12 +21,57 @@ static class AutomateFunction
     var commitObject = await automationContext.ReceiveVersion();
 
     Console.WriteLine("Received version: " + commitObject);
+    var objects = commitObject.Flatten().Where(x => x["parameters"] != null);
 
-    var count = commitObject
-      .Flatten()
-      .Count(b => b.speckle_type == functionInputs.SpeckleTypeToCount);
+    //just forcing the nuget to load
+    //Autodesk.Revit.DB.XYZ x = new Autodesk.Revit.DB.XYZ();
+    //var converter = new ConverterRevit();
 
-    Console.WriteLine($"Counted {count} objects");
-    automationContext.MarkRunSuccess($"Counted {count} objects");
+    //var traverseFunction = DefaultTraversal.CreateRevitTraversalFunc(converter);
+    //var objectsToConvert = traverseFunction
+    //  .Traverse(commitObject)
+    //  .Select(tc => tc.current)
+    //  .ToList();
+
+    int failedElements = 0;
+
+    foreach (var item in objects)
+    {
+
+      Console.WriteLine($"Processing id={item.id} name={item["name"]} cat={item["category"]}");
+
+      var parameters = item["parameters"] as Base;
+      if (parameters == null)
+      {
+        Console.WriteLine($"No parameters found");
+        continue;
+      }
+
+      var p = parameters["Fire Rating"] as Parameter;
+      if (p == null || p.value == null)
+      {
+        Console.WriteLine($"No Fire Rating found");
+        continue;
+      }
+
+
+      var fireRating = (int)p.value;
+
+      Console.WriteLine($"Fire rating for {item.id} is {fireRating}");
+
+      if (fireRating < functionInputs.MinFireRating)
+      {
+        failedElements++;
+        automationContext.AttachErrorToObjects("Fire 🔥", new List<string> { item.id });
+      }
+
+
+    }
+
+    if (failedElements > 0)
+      automationContext.MarkRunFailed($"{failedElements} elements failed Fire Rating check");
+    else
+      automationContext.MarkRunSuccess($"Check complete");
+
   }
 }

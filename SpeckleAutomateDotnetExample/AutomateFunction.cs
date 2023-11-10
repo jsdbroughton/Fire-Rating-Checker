@@ -55,7 +55,13 @@ static class AutomateFunction
       }
 
 
-      var fireRating = (int)p.value;
+      int fireRating;
+
+      if (!int.TryParse(p.value.ToString(), out fireRating))
+      {
+        Console.WriteLine($"No valid Fire Rating found");
+        continue;
+      }
 
       Console.WriteLine($"Fire rating for {item.id} is {fireRating}");
 

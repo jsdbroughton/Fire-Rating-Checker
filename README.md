@@ -1,4 +1,4 @@
-[![build and deploy Speckle functions](https://github.com/specklesystems/speckle_automate-fire_code_compliance_checker/actions/workflows/main.yml/badge.svg)](https://github.com/specklesystems/speckle_automate-fire_code_compliance_checker/actions/workflows/main.yml)
+[![build and deploy Speckle functions](https://github.com/teocomi/Fire-Rating-Checker/actions/workflows/main.yml/badge.svg)](https://github.com/teocomi/Fire-Rating-Checker/actions/workflows/main.yml)
 
 # Speckle Automate Function: Fire Code Compliance Checker
 
